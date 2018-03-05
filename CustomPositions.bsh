@@ -1,0 +1,130 @@
+//Chris Gell December 2017 v2
+//Code to image arbitrary sized and oritented microarrays, using a 2-point position calibration.
+//All the code is setting out to do is to create a position list. All other
+//aspects of imaging, for now, are handled in the standard MM interface.
+
+//currently set up for the BL and TR for oritentation. it is assumed these are set as the 
+//first and second positions in the gui position list.
+
+//idea is to set up a minimal script and then test.  
+
+
+ 
+
+import org.micromanager.MultiStagePosition;
+import org.micromanager.PositionList;
+import org.micromanager.StagePosition;
+import ij.gui.GenericDialog;
+
+
+
+nrGridPoints = 3;//the 'side', i.e. a topo is 66, not 66x66
+distance = 100;  //assume this is in microns??
+
+
+//read in the current positon list, this will contain BL and TR coords
+//from which to calculate the angles.
+PositionList plOrg = mm.positions().getPositionList(); 
+mm.positions().setPositionList( plOrg ); 
+
+
+//should add in some error checks here.
+BLxPos=plOrg.getPosition(0).x;
+BLyPos=plOrg.getPosition(0).y;
+TRxPos=plOrg.getPosition(1).x;
+TRyPos=plOrg.getPosition(1).y;
+
+print("BL "+BLxPos+","+BLyPos);
+print("TR "+TRxPos+","+TRyPos);
+
+//initialise this, will use this for error checks later
+clockW=2;
+
+//******************************
+//work out the rotation CW or CCW and the angle from here, then set up conditonal calculations below.
+//set this flag to 0 if motion is counter clock wise, 1 if it's clockwise
+if (TRxPos-BLxPos <= nrGridPoints*distance) { //CCW
+	clockW=0;
+	print("1st");
+} else {
+	clockW=1; //CW
+	print("2nd");
+}
+
+//print(clockW);
+
+//Calculate the angle of rotation
+angleTRBL=Math.atan((TRyPos-BLyPos)/(TRxPos-BLxPos));
+angleTRBL=Math.toRadians(45)-angleTRBL;
+print("angle "+Math.toDegrees(angleTRBL));
+
+
+
+//manually place the stage at BL. could automate this, unecessary too.		
+PositionList pl = new PositionList();
+mm.positions().setPositionList(pl);
+xy = mmc.getXYStageDevice();
+xPos = mmc.getXPosition(xy);
+yPos = mmc.getYPosition(xy);
+
+
+
+//counter clockiwise rotation 
+if (clockW=0) { 
+	for (int i =0; i < nrGridPoints; i++) {
+		for (int j=0; j < nrGridPoints; j++) {
+			MultiStagePosition msp = new MultiStagePosition();
+			StagePosition s = new StagePosition();
+			s.stageName = xy;
+			s.numAxes = 2;
+			s.x = j * distance;
+			s.y = i * distance;
+	
+			//print("s.x on this loop is "+s.x);
+			//print("s.y on this loop is "+s.y);
+		
+			corrX = xPos + s.x*Math.cos(angleTRTL) - s.y*Math.sin(angleTRTL);
+			corrY = yPos + s.y*Math.cos(angleTRTL) + s.x*Math.sin(angleTRTL);
+	
+			s.x=corrX;
+			s.y=corrY;
+	
+			//print("s.x on this loop is "+s.x);
+			//print("s.y on this loop is "+s.y);
+			
+			msp.add(s);
+			msp.setLabel("Pos-" + i + "-" + j);
+			pl.addPosition(msp);
+		}
+	}
+	//clockwise rotation
+} else { 
+		for (int i =0; i < nrGridPoints; i++) {
+			for (int j=0; j < nrGridPoints; j++) {
+				MultiStagePosition msp = new MultiStagePosition();
+				StagePosition s = new StagePosition();
+				s.stageName = xy;
+				s.numAxes = 2;
+				s.x = j * distance;
+				s.y = i * distance;
+		
+				//print("s.x on this loop is "+s.x);
+				//print("s.y on this loop is "+s.y);
+			
+				corrX = xPos + s.x*Math.cos(angleTRTL) + s.y*Math.sin(angleTRTL);
+				corrY = yPos + s.y*Math.cos(angleTRTL) - s.x*Math.sin(angleTRTL);
+		
+				s.x=corrX;
+				s.y=corrY;
+		
+				//print("s.x on this loop is "+s.x);
+				//print("s.y on this loop is "+s.y);
+				
+				msp.add(s);
+				msp.setLabel("Pos-" + i + "-" + j);
+				pl.addPosition(msp);
+			}
+	}
+}
+
+mm.positions().setPositionList(pl);
