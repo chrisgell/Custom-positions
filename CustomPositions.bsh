@@ -15,17 +15,23 @@ import org.micromanager.MultiStagePosition;
 import org.micromanager.PositionList;
 import org.micromanager.StagePosition;
 import ij.gui.GenericDialog;
+import java.lang.System;
+import org.micromanager.api.PositionList; 
+import org.micromanager.api.MultiStagePosition; 
+import org.micromanager.api.StagePosition; 
+import org.micromanager.api.PositionListDlg;	
 
-
-
+//////////////////////////////////////////////////////////////// 
+//EDIT THESE BASED ON ARRAY SIZE AND GEOMETERY
 nrGridPoints = 3;//the 'side', i.e. a topo is 66, not 66x66
 distance = 100;  //assume this is in microns??
+////////////////////////////////////////////////////////////////
 
 
 //read in the current positon list, this will contain BL and TR coords
 //from which to calculate the angles.
-PositionList plOrg = mm.positions().getPositionList(); 
-mm.positions().setPositionList( plOrg ); 
+PositionList plOrg = gui.getPositionList(); //get current PossitionList 
+
 
 
 //should add in some error checks here.
@@ -34,21 +40,30 @@ BLyPos=plOrg.getPosition(0).y;
 TRxPos=plOrg.getPosition(1).x;
 TRyPos=plOrg.getPosition(1).y;
 
-print("BL "+BLxPos+","+BLyPos);
-print("TR "+TRxPos+","+TRyPos);
+//print("BL "+BLxPos+","+BLyPos);
+//print("TR "+TRxPos+","+TRyPos);
+
+
+
+//empty the position list
+plOrg.clearAllPositions();
+
+
 
 //initialise this, will use this for error checks later
 clockW=2;
 
+
+
 //******************************
-//work out the rotation CW or CCW and the angle from here, then set up conditonal calculations below.
+//will need to work out the rotation CW or CCW and the angle from here, then set up conditonal calculations below.
 //set this flag to 0 if motion is counter clock wise, 1 if it's clockwise
 if (TRxPos-BLxPos <= nrGridPoints*distance) { //CCW
 	clockW=0;
-	print("1st");
+	//print("1st");
 } else {
 	clockW=1; //CW
-	print("2nd");
+	//print("2nd");
 }
 
 //print(clockW);
@@ -56,21 +71,26 @@ if (TRxPos-BLxPos <= nrGridPoints*distance) { //CCW
 //Calculate the angle of rotation
 angleTRBL=Math.atan((TRyPos-BLyPos)/(TRxPos-BLxPos));
 angleTRBL=Math.toRadians(45)-angleTRBL;
-print("angle "+Math.toDegrees(angleTRBL));
+//print("angle "+Math.toDegrees(angleTRBL));
 
 
 
 //manually place the stage at BL. could automate this, unecessary too.		
-PositionList pl = new PositionList();
-mm.positions().setPositionList(pl);
-xy = mmc.getXYStageDevice();
-xPos = mmc.getXPosition(xy);
-yPos = mmc.getYPosition(xy);
+//PositionList pl = new PositionList();
+//gui.positions().setPositionList(pl);
+//xy = mmc.getXYStageDevice();
+//xPos = mmc.getXPosition(xy);
+//yPos = mmc.getYPosition(xy);
+
+
+
+//force rotation to be CW for debugging
+clockW=1; //CW
 
 
 
 //counter clockiwise rotation 
-if (clockW=0) { 
+if (clockW==0) { 
 	for (int i =0; i < nrGridPoints; i++) {
 		for (int j=0; j < nrGridPoints; j++) {
 			MultiStagePosition msp = new MultiStagePosition();
@@ -82,19 +102,21 @@ if (clockW=0) {
 	
 			//print("s.x on this loop is "+s.x);
 			//print("s.y on this loop is "+s.y);
-		
-			corrX = xPos + s.x*Math.cos(angleTRTL) - s.y*Math.sin(angleTRTL);
-			corrY = yPos + s.y*Math.cos(angleTRTL) + s.x*Math.sin(angleTRTL);
+
+
+				//will need to compute the rotation correction factors here here
+			//corrX = xPos + s.x*Math.cos(angleTRTL) - s.y*Math.sin(angleTRTL);
+			//corrY = yPos + s.y*Math.cos(angleTRTL) + s.x*Math.sin(angleTRTL);
 	
-			s.x=corrX;
-			s.y=corrY;
+			//s.x=corrX;
+			//s.y=corrY;
 	
 			//print("s.x on this loop is "+s.x);
 			//print("s.y on this loop is "+s.y);
 			
 			msp.add(s);
 			msp.setLabel("Pos-" + i + "-" + j);
-			pl.addPosition(msp);
+			plOrg.addPosition(msp);
 		}
 	}
 	//clockwise rotation
@@ -108,23 +130,24 @@ if (clockW=0) {
 				s.x = j * distance;
 				s.y = i * distance;
 		
-				//print("s.x on this loop is "+s.x);
-				//print("s.y on this loop is "+s.y);
-			
-				corrX = xPos + s.x*Math.cos(angleTRTL) + s.y*Math.sin(angleTRTL);
-				corrY = yPos + s.y*Math.cos(angleTRTL) - s.x*Math.sin(angleTRTL);
-		
-				s.x=corrX;
-				s.y=corrY;
+				print("s.x on this loop is "+s.x);
+				print("s.y on this loop is "+s.y);
+
+
+				//will need to compute the rotation correction factors here here
+				//corrX = xPos + s.x*Math.cos(angleTRTL) + s.y*Math.sin(angleTRTL);
+				//corrY = yPos + s.y*Math.cos(angleTRTL) - s.x*Math.sin(angleTRTL);
+				//s.x=corrX;
+				//s.y=corrY;
 		
 				//print("s.x on this loop is "+s.x);
 				//print("s.y on this loop is "+s.y);
 				
 				msp.add(s);
 				msp.setLabel("Pos-" + i + "-" + j);
-				pl.addPosition(msp);
+				plOrg.addPosition(msp);
 			}
 	}
 }
 
-mm.positions().setPositionList(pl);
+mm.setPositionList(plOrg);
