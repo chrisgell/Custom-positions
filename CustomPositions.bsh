@@ -1,4 +1,4 @@
-//Chris Gell December 2017 v2
+//Chris Gell December 2018 v3.1
 //Code to image arbitrary sized and oritented microarrays, using a 2-point position calibration.
 //All the code is setting out to do is to create a position list. All other
 //aspects of imaging, for now, are handled in the standard MM interface.
