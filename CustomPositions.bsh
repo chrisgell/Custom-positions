@@ -1,4 +1,4 @@
-//Chris Gell December 2018 v3.1
+//Chris Gell December 2018 v3
 //Code to image arbitrary sized and oritented microarrays, using a 2-point position calibration.
 //All the code is setting out to do is to create a position list. All other
 //aspects of imaging, for now, are handled in the standard MM interface.
@@ -11,9 +11,9 @@
 
  
 
-import org.micromanager.MultiStagePosition;
-import org.micromanager.PositionList;
-import org.micromanager.StagePosition;
+//import org.micromanager.MultiStagePosition;
+//import org.micromanager.PositionList;
+//import org.micromanager.StagePosition;
 import ij.gui.GenericDialog;
 import java.lang.System;
 import org.micromanager.api.PositionList; 
@@ -125,7 +125,7 @@ if (clockW==0) {
 			for (int j=0; j < nrGridPoints; j++) {
 				MultiStagePosition msp = new MultiStagePosition();
 				StagePosition s = new StagePosition();
-				s.stageName = xy;
+				//s.stageName = xy;
 				s.numAxes = 2;
 				s.x = j * distance;
 				s.y = i * distance;
