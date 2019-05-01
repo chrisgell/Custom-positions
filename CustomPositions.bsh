@@ -95,7 +95,7 @@ if (clockW==0) {
 		for (int j=0; j < nrGridPoints; j++) {
 			MultiStagePosition msp = new MultiStagePosition();
 			StagePosition s = new StagePosition();
-			s.stageName = xy;
+			s.stageName = "XYStage";
 			s.numAxes = 2;
 			s.x = j * distance;
 			s.y = i * distance;
@@ -125,7 +125,7 @@ if (clockW==0) {
 			for (int j=0; j < nrGridPoints; j++) {
 				MultiStagePosition msp = new MultiStagePosition();
 				StagePosition s = new StagePosition();
-				//s.stageName = xy;
+				s.stageName = "XYStage";
 				s.numAxes = 2;
 				s.x = j * distance;
 				s.y = i * distance;
