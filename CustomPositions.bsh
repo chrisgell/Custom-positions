@@ -1,4 +1,4 @@
-//Chris Gell December 2018 v3
+//Chris Gell December 2019 v3b
 //Code to image arbitrary sized and oritented microarrays, using a 2-point position calibration.
 //All the code is setting out to do is to create a position list. All other
 //aspects of imaging, for now, are handled in the standard MM interface.
@@ -9,11 +9,6 @@
 //idea is to set up a minimal script and then test.  
 
 
- 
-
-//import org.micromanager.MultiStagePosition;
-//import org.micromanager.PositionList;
-//import org.micromanager.StagePosition;
 import ij.gui.GenericDialog;
 import java.lang.System;
 import org.micromanager.api.PositionList; 
@@ -21,10 +16,19 @@ import org.micromanager.api.MultiStagePosition;
 import org.micromanager.api.StagePosition; 
 import org.micromanager.api.PositionListDlg;	
 
-//////////////////////////////////////////////////////////////// 
+
+//////////////////////////////////////////////////////////////////
+//Should eventially have the flexability to cope with different arrays
+//for now the behaviour is coded manually into different scripts.
+///////////////////////////////////////////////////////////////////// 
 //EDIT THESE BASED ON ARRAY SIZE AND GEOMETERY
 nrGridPoints = 3;//the 'side', i.e. a topo is 66, not 66x66
 distance = 100;  //assume this is in microns??
+
+//For the below to work will have to have adidtioanl calib points.
+//numArrays=3;// not functional - will need to cope with 3 per slide
+//offSet=0;	// will alos need to cope with offset arrays
+//offSetnrGridPoints=; //these offset arrays will have different sizes
 ////////////////////////////////////////////////////////////////
 
 
@@ -33,6 +37,7 @@ distance = 100;  //assume this is in microns??
 PositionList plOrg = gui.getPositionList(); //get current PossitionList 
 
 
+//Would be best now to convert the below to a function
 
 //should add in some error checks here.
 BLxPos=plOrg.getPosition(0).x;
@@ -43,12 +48,8 @@ TRyPos=plOrg.getPosition(1).y;
 //print("BL "+BLxPos+","+BLyPos);
 //print("TR "+TRxPos+","+TRyPos);
 
-
-
 //empty the position list
-plOrg.clearAllPositions();
-
-
+//plOrg.clearAllPositions();
 
 //initialise this, will use this for error checks later
 clockW=2;
@@ -60,18 +61,18 @@ clockW=2;
 //set this flag to 0 if motion is counter clock wise, 1 if it's clockwise
 if (TRxPos-BLxPos <= nrGridPoints*distance) { //CCW
 	clockW=0;
-	//print("1st");
+	print("1st");
 } else {
 	clockW=1; //CW
-	//print("2nd");
+	print("2nd");
 }
 
-//print(clockW);
+print(clockW);
 
 //Calculate the angle of rotation
 angleTRBL=Math.atan((TRyPos-BLyPos)/(TRxPos-BLxPos));
 angleTRBL=Math.toRadians(45)-angleTRBL;
-//print("angle "+Math.toDegrees(angleTRBL));
+print("angle "+Math.toDegrees(angleTRBL));
 
 
 
@@ -87,45 +88,18 @@ angleTRBL=Math.toRadians(45)-angleTRBL;
 //force rotation to be CW for debugging
 clockW=1; //CW
 
-
+/*
 
 //counter clockiwise rotation 
 if (clockW==0) { 
-	for (int i =0; i < nrGridPoints; i++) {
-		for (int j=0; j < nrGridPoints; j++) {
-			MultiStagePosition msp = new MultiStagePosition();
-			StagePosition s = new StagePosition();
-			s.stageName = "XYStage";
-			s.numAxes = 2;
-			s.x = j * distance;
-			s.y = i * distance;
 	
-			//print("s.x on this loop is "+s.x);
-			//print("s.y on this loop is "+s.y);
-
-
-				//will need to compute the rotation correction factors here here
-			//corrX = xPos + s.x*Math.cos(angleTRTL) - s.y*Math.sin(angleTRTL);
-			//corrY = yPos + s.y*Math.cos(angleTRTL) + s.x*Math.sin(angleTRTL);
-	
-			//s.x=corrX;
-			//s.y=corrY;
-	
-			//print("s.x on this loop is "+s.x);
-			//print("s.y on this loop is "+s.y);
-			
-			msp.add(s);
-			msp.setLabel("Pos-" + i + "-" + j);
-			plOrg.addPosition(msp);
-		}
-	}
-	//clockwise rotation
+//clockwise rotation
 } else { 
 		for (int i =0; i < nrGridPoints; i++) {
 			for (int j=0; j < nrGridPoints; j++) {
 				MultiStagePosition msp = new MultiStagePosition();
 				StagePosition s = new StagePosition();
-				s.stageName = "XYStage";
+				s.stageName = "XY";
 				s.numAxes = 2;
 				s.x = j * distance;
 				s.y = i * distance;
