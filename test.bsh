@@ -1,0 +1,20 @@
+import ij.gui.GenericDialog;
+import java.lang.System;
+import org.micromanager.api.PositionList; 
+import org.micromanager.api.MultiStagePosition; 
+import org.micromanager.api.StagePosition; 
+import org.micromanager.api.PositionListDlg;	
+
+
+TRyPos=2;
+BLyPos=1;
+TRxPos=2;
+BLxPos=0;
+
+
+
+angleTRBL=Math.atan((TRyPos-BLyPos)/(TRxPos-BLxPos));
+angleTRBL=Math.toRadians(45)-angleTRBL;
+print("angle "+Math.toDegrees(angleTRBL));
+
+
