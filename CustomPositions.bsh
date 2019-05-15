@@ -3,7 +3,7 @@
 //All the code is setting out to do is to create a position list. All other
 //aspects of imaging, for now, are handled in the standard MM interface.
 
-//currently set up for the BL and TR for oritentation. it is assumed these are set as the 
+//currently set up for the TL and TR for oritentation. it is assumed these are set as the 
 //first and second positions in the gui position list.
 
 //idea is to set up a minimal script and then test.  
@@ -23,7 +23,7 @@ import org.micromanager.api.PositionListDlg;
 ///////////////////////////////////////////////////////////////////// 
 //EDIT THESE BASED ON ARRAY SIZE AND GEOMETERY
 nrGridPoints = 3;//the 'side', i.e. a topo is 66, not 66x66
-distance = 100;  //assume this is in microns??
+distance = 3500;  //assume this is in microns??
 
 //For the below to work will have to have adidtioanl calib points.
 //numArrays=3;// not functional - will need to cope with 3 per slide
@@ -40,88 +40,75 @@ PositionList plOrg = gui.getPositionList(); //get current PossitionList
 //Would be best now to convert the below to a function
 
 //should add in some error checks here.
-BLxPos=plOrg.getPosition(0).x;
-BLyPos=plOrg.getPosition(0).y;
-TRxPos=plOrg.getPosition(1).x;
-TRyPos=plOrg.getPosition(1).y;
+BLxPosc=plOrg.getPosition(0).x;
+BLyPosc=plOrg.getPosition(0).y;
+BRxPosc=plOrg.getPosition(1).x;
+BRyPosc=plOrg.getPosition(1).y;
 
-//print("BL "+BLxPos+","+BLyPos);
-//print("TR "+TRxPos+","+TRyPos);
+
+print("BL "+TLxPosc+","+BLyPosc);
+print("BR "+TRxPosc+","+BRyPosc);
+
+float BLxPos=BLxPosc;
+float BLyPos=BLyPosc;
+float BRxPos=BRxPosc;
+float BRyPos=BRyPosc;
+
 
 //empty the position list
-//plOrg.clearAllPositions();
+plOrg.clearAllPositions();
 
 //initialise this, will use this for error checks later
-clockW=2;
+//clockW=-2;
 
 
 
 //******************************
 //will need to work out the rotation CW or CCW and the angle from here, then set up conditonal calculations below.
 //set this flag to 0 if motion is counter clock wise, 1 if it's clockwise
-if (TRxPos-BLxPos <= nrGridPoints*distance) { //CCW
+if (BRyPos-BLyPos > 0) { //CCW
 	clockW=0;
-	print("1st");
+	print("CCW");
 } else {
 	clockW=1; //CW
-	print("2nd");
+	print("CW");
 }
 
-print(clockW);
 
 //Calculate the angle of rotation
-angleTRBL=Math.atan((TRyPos-BLyPos)/(TRxPos-BLxPos));
-angleTRBL=Math.toRadians(45)-angleTRBL;
-print("angle "+Math.toDegrees(angleTRBL));
-
-
-
-//manually place the stage at BL. could automate this, unecessary too.		
-//PositionList pl = new PositionList();
-//gui.positions().setPositionList(pl);
-//xy = mmc.getXYStageDevice();
-//xPos = mmc.getXPosition(xy);
-//yPos = mmc.getYPosition(xy);
-
-
-
-//force rotation to be CW for debugging
-clockW=1; //CW
-
-/*
+float angleBRBL=0.0;
+float angleBRBL=Math.atan((BRyPos-BLyPos)/(BLxPos-BRxPos));
 
 //counter clockiwise rotation 
 if (clockW==0) { 
-	
-//clockwise rotation
-} else { 
-		for (int i =0; i < nrGridPoints; i++) {
+			for (int i =0; i < nrGridPoints; i++) {
 			for (int j=0; j < nrGridPoints; j++) {
 				MultiStagePosition msp = new MultiStagePosition();
 				StagePosition s = new StagePosition();
-				s.stageName = "XY";
+				s.stageName = "XYStage";
 				s.numAxes = 2;
-				s.x = j * distance;
-				s.y = i * distance;
+
+				s.x = (j * distance);
+				s.y = (i * distance);
 		
-				print("s.x on this loop is "+s.x);
-				print("s.y on this loop is "+s.y);
+		
 
 
 				//will need to compute the rotation correction factors here here
-				//corrX = xPos + s.x*Math.cos(angleTRTL) + s.y*Math.sin(angleTRTL);
-				//corrY = yPos + s.y*Math.cos(angleTRTL) - s.x*Math.sin(angleTRTL);
-				//s.x=corrX;
-				//s.y=corrY;
-		
-				//print("s.x on this loop is "+s.x);
-				//print("s.y on this loop is "+s.y);
+				corrX = s.x*Math.cos(angleBRBL) - s.y*Math.sin(angleBRBL);
+				corrY = s.x*Math.sin(angleBRBL) + s.y*Math.cos(angleBRBL);
+				s.x=BLxPos-corrX;
+				s.y=BLyPos+corrY;
+
 				
 				msp.add(s);
 				msp.setLabel("Pos-" + i + "-" + j);
 				plOrg.addPosition(msp);
 			}
 	}
+//clockwise rotation
+} else { 
+
 }
 
 mm.setPositionList(plOrg);
